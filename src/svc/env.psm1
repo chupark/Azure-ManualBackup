@@ -13,9 +13,9 @@ Class envConfig {
     [PSCustomObject]$genereatedKey
     [PSCustomObject]$keyVaultConfig
     [PSCustomObject]$storedKey
-
+    
     generateEncKey() {
-        $CreateKey = New-Object Byte[] 64
+        $CreateKey = New-Object Byte[] 32
         [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($CreateKey)
         $this.genereatedKey = $CreateKey
     }
@@ -27,6 +27,11 @@ Class envConfig {
     [void]sendKeyToVault([PSCustomObject]$secretValue) {
         $secret = ConvertTo-SecureString ($secretValue -join (",")) -AsPlainText -Force
         Set-AzKeyVaultSecret -VaultName $this.keyVaultConfig.name -Name $this.keyVaultConfig.secret.name -SecretValue $secret
+    }
+
+    [void]sendSPInfoToVault([String]$name, [String]$value) {
+        $secretValue = ConvertTo-SecureString $value -AsPlainText -Force
+        Set-AzKeyVaultSecret -VaultName $this.keyVaultConfig.name -Name $name -SecretValue $secretValue
     }
 
     [PSCustomObject]getStoredKey() {
@@ -81,6 +86,11 @@ class encryption {
 
     [String]getEncryptedKeyString([PSCustomObject]$inputString) {
         $encryptedString = (ConvertTo-SecureString $inputString -AsPlainText -Force | ConvertFrom-SecureString -key $this.secretKey)
+        return $encryptedString
+    }
+
+    [String]getEncryptedKeyObject([PSCustomObject]$inputString) {
+        $encryptedString = (ConvertTo-SecureString $inputString -key $this.secretKey -Force)
         return $encryptedString
     }
 

@@ -1,5 +1,6 @@
 {
-    "clientId" : "aaaa",
-    "password" : "aaaa",
-    "tenant" : "aaaa"
+    "clientId" : "client ID",
+    "password" : "password",
+    "tenant" : "tenant",
+    "subscription" : "subscription"
 }

@@ -12,8 +12,9 @@ Import-Module ($env:Azure_Manual_Backup + "src\svc\env.psm1")-Force
 
 $snapshotListsCSVs = Import-Csv -Path  ($env:Azure_Manual_Backup + "statics\diskLists.csv")
 $programEnv = Get-Content -Raw -Path  ($env:Azure_Manual_Backup + "statics\storageConfig\env.json") -Force | ConvertFrom-Json
-$keyVaultConfig = Get-Content -Raw -Path  ($env:Azure_Manual_Backup + "statics\storageConfig\keyvaultinfo.json") -Force | ConvertFrom-Json
-$storageConfig = Get-Content -Raw -Path  ($env:Azure_Manual_Backup + "statics\storageConfig\storageInfo.json") -Force | ConvertFrom-Json
+$keyVaultConfig = $programEnv.keyVaultInfo
+$storageConfig = $programEnv.storageConfig
+
 
 
 $envConfig = getEnvConfig
@@ -31,9 +32,14 @@ $encryptionConfig = getEncryptionConfig
 $encryptionConfig.setSecretKey($storedKey.SecretValueText.Split(","))
 $tmpcred = Get-Content -Path  ($env:Azure_Manual_Backup + "statics\storageConfig\logincred.json") | ConvertFrom-Json
 $programEnv.loginCred.clientId = $encryptionConfig.getEncryptedKeyString($tmpcred.clientId)
-$programEnv.loginCred.password = $encryptionConfig.getEncryptedKeyString($tmpcred.password)
+$programEnv.loginCred.thumbPrint = $encryptionConfig.getEncryptedKeyString($tmpcred.thumbPrint)
 $programEnv.loginCred.tenant = $encryptionConfig.getEncryptedKeyString($tmpcred.tenant)
 $programEnv.loginCred.subscription = $encryptionConfig.getEncryptedKeyString($tmpcred.subscription)
+
+$envConfig.sendSPInfoToVault("clientId", $encryptionConfig.getEncryptedKeyString($tmpcred.clientId))
+$envConfig.sendSPInfoToVault("thumbPrint", $encryptionConfig.getEncryptedKeyString($tmpcred.thumbPrint))
+$envConfig.sendSPInfoToVault("tenant", $encryptionConfig.getEncryptedKeyString($tmpcred.tenant))
+$envConfig.sendSPInfoToVault("subscription", $encryptionConfig.getEncryptedKeyString($tmpcred.subscription))
 
 
 New-AzStorageTable -Context $tableStorageConfig.storageInfo.Context -Name "meta"
@@ -51,7 +57,6 @@ Add-AzTableRow -Table $cloudTable `
                -jsonString ($programEnv | ConvertTo-Json)
 $config = (Get-AzTableRow -Table $cloudTable).config | ConvertFrom-Json
 ## Remove-AzTableRow -Table $cloudTable -PartitionKey "config" -RowKey "allConfig"
-
 
 
 $cloudTable = $tableStorageConfig.getCloudTable($config.vmListsForBackup)

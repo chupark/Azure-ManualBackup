@@ -1,7 +1,0 @@
-{
-    "name" : "pcw-keystore",
-    "resourceGroup" : "RG-KeyStore",
-    "secret" : {
-        "name" : "manualBackupKey"
-    }
-}
