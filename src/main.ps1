@@ -17,6 +17,7 @@ $keyVaultConfig = $programEnv.keyVaultInfo
 ## load Encryption Key from Azure Key Vault
 $secretKey = (Get-AzKeyVaultSecret -VaultName $keyVaultConfig.name -Name $keyVaultConfig.secret.name).SecretValueText.Split(",")
 
+## BackupSnapshot-D-bizchdb-D-bizchdb-DATA-2019-10-15
 ## load SnapshotTools Class & key setting
 $snapshotTools = getSnapshotTools
 $snapshotTools.setStorageConfig($storageConfig)

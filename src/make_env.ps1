@@ -16,7 +16,6 @@ $keyVaultConfig = $programEnv.keyVaultInfo
 $storageConfig = $programEnv.storageConfig
 
 
-
 $envConfig = getEnvConfig
 $envConfig.generateEncKey()
 $envConfig.setkeyVaultConfig($keyVaultConfig)
@@ -32,12 +31,13 @@ $encryptionConfig = getEncryptionConfig
 $encryptionConfig.setSecretKey($storedKey.SecretValueText.Split(","))
 $tmpcred = Get-Content -Path  ($env:Azure_Manual_Backup + "statics\storageConfig\logincred.json") | ConvertFrom-Json
 $programEnv.loginCred.clientId = $encryptionConfig.getEncryptedKeyString($tmpcred.clientId)
-$programEnv.loginCred.thumbPrint = $encryptionConfig.getEncryptedKeyString($tmpcred.thumbPrint)
+$programEnv.loginCred.password = $encryptionConfig.getEncryptedKeyString($tmpcred.password)
 $programEnv.loginCred.tenant = $encryptionConfig.getEncryptedKeyString($tmpcred.tenant)
 $programEnv.loginCred.subscription = $encryptionConfig.getEncryptedKeyString($tmpcred.subscription)
 
+
 $envConfig.sendSPInfoToVault("clientId", $encryptionConfig.getEncryptedKeyString($tmpcred.clientId))
-$envConfig.sendSPInfoToVault("thumbPrint", $encryptionConfig.getEncryptedKeyString($tmpcred.thumbPrint))
+$envConfig.sendSPInfoToVault("password", $encryptionConfig.getEncryptedKeyString($tmpcred.password))
 $envConfig.sendSPInfoToVault("tenant", $encryptionConfig.getEncryptedKeyString($tmpcred.tenant))
 $envConfig.sendSPInfoToVault("subscription", $encryptionConfig.getEncryptedKeyString($tmpcred.subscription))
 
